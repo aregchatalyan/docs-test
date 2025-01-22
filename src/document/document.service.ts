@@ -49,7 +49,6 @@ export class DocumentService {
       });
     } catch (e) {
       if (e instanceof S3ServiceException) throw new BadRequestException(e.message);
-      throw new BadRequestException('An error occurred while upload the document');
     }
   }
 
@@ -72,7 +71,6 @@ export class DocumentService {
       return body;
     } catch (e) {
       if (e instanceof S3ServiceException) throw new BadRequestException(e.message);
-      throw new BadRequestException('An error occurred while request the document');
     }
   }
 
@@ -92,7 +90,6 @@ export class DocumentService {
       return { message: 'Document deleted successfully' }
     } catch (e) {
       if (e instanceof S3ServiceException) throw new BadRequestException(e.message);
-      throw new BadRequestException('An error occurred while deleting the document');
     }
   }
 
