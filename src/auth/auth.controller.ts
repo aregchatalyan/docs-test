@@ -1,4 +1,13 @@
-import { Controller, Post, Body, Get, Req, UseGuards, HttpCode, HttpStatus } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Get,
+  Req,
+  UseGuards,
+  HttpCode,
+  HttpStatus,
+} from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { SignUpDto } from './dto/sign-up.dto';
@@ -16,11 +25,11 @@ export class AuthController {
   @ApiBody({ type: SignUpDto })
   @ApiResponse({
     status: HttpStatus.CREATED,
-    description: 'User successfully registered.'
+    description: 'User successfully registered.',
   })
   @ApiResponse({
     status: HttpStatus.BAD_REQUEST,
-    description: 'User already exists.'
+    description: 'User already exists.',
   })
   signup(@Body() signUpDto: SignUpDto) {
     return this.authService.signup(signUpDto);
@@ -34,16 +43,16 @@ export class AuthController {
     status: HttpStatus.OK,
     description: 'Authentication successful, returns an access token.',
     schema: {
-      example: { accessToken: 'your-jwt-token' }
-    }
+      example: { accessToken: 'your-jwt-token' },
+    },
   })
   @ApiResponse({
     status: HttpStatus.NOT_FOUND,
-    description: 'User not found.'
+    description: 'User not found.',
   })
   @ApiResponse({
     status: HttpStatus.UNAUTHORIZED,
-    description: 'Invalid email or password.'
+    description: 'Invalid email or password.',
   })
   signin(@Body() signInDto: SignInDto) {
     return this.authService.signin(signInDto);
@@ -57,12 +66,12 @@ export class AuthController {
     status: HttpStatus.OK,
     description: 'Returns the authenticated user’s details.',
     schema: {
-      example: { id: 1, username: 'john_doe', email: 'john.doe@example.com' }
-    }
+      example: { id: 1, username: 'john_doe', email: 'john.doe@example.com' },
+    },
   })
   @ApiResponse({
     status: HttpStatus.UNAUTHORIZED,
-    description: 'User is not authenticated.'
+    description: 'User is not authenticated.',
   })
   me(@Req() req: JwtPayload) {
     return this.authService.me(req.user);

@@ -1,4 +1,9 @@
-import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { JwtPayload } from './auth.guard';
@@ -16,13 +21,12 @@ export class AuthService {
   async signup(signUpDto: SignUpDto) {
     const user = await this.prisma.user.findFirst({
       where: {
-        OR: [
-          { email: signUpDto.email },
-          { username: signUpDto.username }
-        ]
-      }
+        OR: [{ email: signUpDto.email }, { username: signUpDto.username }],
+      },
     });
-    if (user) throw new BadRequestException('User already exists');
+    if (user) {
+      throw new BadRequestException('User already exists');
+    }
 
     const salt = await bcrypt.genSalt(10);
     signUpDto.password = await bcrypt.hash(signUpDto.password, salt);
@@ -33,35 +37,41 @@ export class AuthService {
   async signin(signInDto: SignInDto) {
     const user = await this.prisma.user.findFirst({
       where: {
-        OR: [
-          { email: signInDto.email },
-          { username: signInDto.username }
-        ]
-      }
+        OR: [{ email: signInDto.email }, { username: signInDto.username }],
+      },
     });
-    if (!user) throw new NotFoundException('User not found');
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
 
-    const isCorrectPassword = await bcrypt.compare(signInDto.password, user.password);
-    if (!isCorrectPassword) throw new UnauthorizedException('Invalid email or password');
+    const isCorrectPassword = await bcrypt.compare(
+      signInDto.password,
+      user.password
+    );
+    if (!isCorrectPassword) {
+      throw new UnauthorizedException('Invalid email or password');
+    }
 
     const accessToken = this.jwtService.sign({
       userId: user.id,
-      email: user.email
+      email: user.email,
     });
 
     return { accessToken };
   }
 
   async me(payload: JwtPayload['user']) {
-    if (!payload) throw new UnauthorizedException();
+    if (!payload) {
+      throw new UnauthorizedException();
+    }
 
     return this.prisma.user.findUnique({
       where: { email: payload.email },
       select: {
         id: true,
         username: true,
-        email: true
-      }
+        email: true,
+      },
     });
   }
 }

@@ -8,11 +8,11 @@ import { DocumentModule } from './document/document.module';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      expandVariables: true
+      expandVariables: true,
     }),
     PrismaModule,
     AuthModule,
-    DocumentModule
-  ]
+    DocumentModule,
+  ],
 })
 export class AppModule {}
