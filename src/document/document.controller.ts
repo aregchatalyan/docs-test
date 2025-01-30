@@ -14,12 +14,17 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import {
+  ApiBadRequestResponse,
+  ApiBearerAuth,
   ApiBody,
   ApiConsumes,
+  ApiCreatedResponse,
+  ApiNotFoundResponse,
+  ApiOkResponse,
   ApiOperation,
   ApiParam,
-  ApiResponse,
   ApiTags,
+  ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { DocumentService } from './document.service';
 import { AuthGuard } from '../auth/auth.guard';
@@ -30,13 +35,7 @@ import { FileValidationPipe } from '../utils/pipes/file-validation.pipe';
 export class DocumentController {
   constructor(private readonly documentService: DocumentService) {}
 
-  @UseGuards(AuthGuard)
-  @HttpCode(HttpStatus.CREATED)
-  @Post('upload')
-  @ApiOperation({
-    summary: 'Upload a document',
-    description: 'Allows authenticated users to upload a document.',
-  })
+  @ApiOperation({ summary: 'Upload a document' })
   @ApiConsumes('multipart/form-data')
   @ApiBody({
     schema: {
@@ -50,11 +49,11 @@ export class DocumentController {
       },
     },
   })
-  @ApiResponse({
-    status: HttpStatus.CREATED,
+  @ApiCreatedResponse({
     description: 'Document uploaded successfully.',
     schema: {
       example: {
+        uuid: 'string',
         key: 'string',
         hash: 'string',
         name: 'string',
@@ -63,14 +62,10 @@ export class DocumentController {
       },
     },
   })
-  @ApiResponse({
-    status: HttpStatus.BAD_REQUEST,
+  @ApiBadRequestResponse({
     description: 'Invalid file format or file size exceeds the limit.',
   })
-  @ApiResponse({
-    status: HttpStatus.UNAUTHORIZED,
-    description: 'User is not authenticated.',
-  })
+  @ApiUnauthorizedResponse({ description: 'User is not authenticated.' })
   @UseInterceptors(FileInterceptor('file'))
   @UsePipes(
     new FileValidationPipe(
@@ -78,54 +73,40 @@ export class DocumentController {
       10 * 1024 * 1024
     )
   )
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard)
+  @HttpCode(HttpStatus.CREATED)
+  @Post('upload')
   uploadDocument(@UploadedFile() file: Express.Multer.File) {
     return this.documentService.uploadDocument(file);
   }
 
+  @ApiOperation({ summary: 'Get a document' })
+  @ApiParam({
+    name: 'uuid',
+    type: String,
+    description: 'The unique identifier of the document.',
+    example: '433e0fc5-e362-4d6b-a6da-1bbade4447e9',
+  })
+  @ApiOkResponse({ description: 'Document retrieved successfully.' })
+  @ApiNotFoundResponse({ description: 'Document not found.' })
+  @ApiUnauthorizedResponse({ description: 'User is not authenticated.' })
+  @ApiBearerAuth()
   @UseGuards(AuthGuard)
   @HttpCode(HttpStatus.OK)
   @Get(':uuid')
-  @ApiOperation({
-    summary: 'Get a document',
-    description: 'Retrieve a document by its UUID.',
-  })
-  @ApiParam({
-    name: 'uuid',
-    type: Number,
-    description: 'The unique identifier of the document.',
-    example: 1,
-  })
-  @ApiResponse({
-    status: HttpStatus.OK,
-    description: 'Document retrieved successfully.',
-  })
-  @ApiResponse({
-    status: HttpStatus.NOT_FOUND,
-    description: 'Document not found.',
-  })
-  @ApiResponse({
-    status: HttpStatus.UNAUTHORIZED,
-    description: 'User is not authenticated.',
-  })
   getDocument(@Param('uuid', ParseUUIDPipe) uuid: string) {
     return this.documentService.getDocument(uuid);
   }
 
-  @UseGuards(AuthGuard)
-  @HttpCode(HttpStatus.OK)
-  @Delete(':uuid')
-  @ApiOperation({
-    summary: 'Delete a document',
-    description: 'Delete a document by its UUID.',
-  })
+  @ApiOperation({ summary: 'Delete a document' })
   @ApiParam({
     name: 'uuid',
-    type: Number,
+    type: String,
     description: 'The unique identifier of the document.',
-    example: 1,
+    example: '433e0fc5-e362-4d6b-a6da-1bbade4447e9',
   })
-  @ApiResponse({
-    status: HttpStatus.OK,
+  @ApiOkResponse({
     description: 'Document deleted successfully.',
     schema: {
       example: {
@@ -133,14 +114,12 @@ export class DocumentController {
       },
     },
   })
-  @ApiResponse({
-    status: HttpStatus.NOT_FOUND,
-    description: 'Document not found.',
-  })
-  @ApiResponse({
-    status: HttpStatus.UNAUTHORIZED,
-    description: 'User is not authenticated.',
-  })
+  @ApiNotFoundResponse({ description: 'Document not found.' })
+  @ApiUnauthorizedResponse({ description: 'User is not authenticated.' })
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard)
+  @HttpCode(HttpStatus.OK)
+  @Delete(':uuid')
   deleteDocument(@Param('uuid', ParseUUIDPipe) uuid: string) {
     return this.documentService.deleteDocument(uuid);
   }

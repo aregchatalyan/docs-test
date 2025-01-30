@@ -25,6 +25,7 @@ import { AppModule } from './app.module';
   );
 
   const swaggerConfig = new DocumentBuilder()
+    .addBearerAuth()
     .setTitle('Test')
     .setDescription('Test app API')
     .setVersion('1.0')
