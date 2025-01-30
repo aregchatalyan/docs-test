@@ -13,6 +13,7 @@ CREATE TABLE "users" (
 -- CreateTable
 CREATE TABLE "documents" (
     "id" SERIAL NOT NULL,
+    "uuid" UUID,
     "name" TEXT NOT NULL,
     "key" TEXT NOT NULL,
     "hash" TEXT NOT NULL,
@@ -27,3 +28,6 @@ CREATE UNIQUE INDEX "users_username_key" ON "users"("username");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "documents_uuid_key" ON "documents"("uuid");

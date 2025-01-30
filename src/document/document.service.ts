@@ -4,6 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { randomUUID } from 'crypto';
 import { Readable } from 'stream';
 import {
   S3Client,
@@ -42,7 +43,8 @@ export class DocumentService {
     }
 
     const hash = toHash(file.buffer);
-    const key = `${hash}-${file.originalname}`;
+    const uuid = randomUUID();
+    const key = `${hash}-${uuid}`;
 
     try {
       const command = new PutObjectCommand({
@@ -53,7 +55,7 @@ export class DocumentService {
       await this.s3.send(command);
 
       return this.prisma.document.create({
-        data: { key, hash, name: file.originalname },
+        data: { key, hash, uuid, name: file.originalname },
       });
     } catch (e) {
       if (e instanceof S3ServiceException) {
@@ -62,8 +64,8 @@ export class DocumentService {
     }
   }
 
-  async getDocument(id: number) {
-    const document = await this.prisma.document.findUnique({ where: { id } });
+  async getDocument(uuid: string) {
+    const document = await this.prisma.document.findUnique({ where: { uuid } });
     if (!document) {
       throw new NotFoundException('Document not found');
     }
@@ -92,8 +94,8 @@ export class DocumentService {
     }
   }
 
-  async deleteDocument(id: number) {
-    const document = await this.prisma.document.findUnique({ where: { id } });
+  async deleteDocument(uuid: string) {
+    const document = await this.prisma.document.findUnique({ where: { uuid } });
     if (!document) {
       throw new NotFoundException('Document not found');
     }
@@ -105,7 +107,7 @@ export class DocumentService {
       });
       await this.s3.send(command);
 
-      await this.prisma.document.delete({ where: { id } });
+      await this.prisma.document.delete({ where: { uuid } });
 
       return { message: 'Document deleted successfully' };
     } catch (e) {

@@ -6,11 +6,11 @@ import {
   Delete,
   UseInterceptors,
   UploadedFile,
-  ParseIntPipe,
   UseGuards,
   HttpCode,
   HttpStatus,
   UsePipes,
+  ParseUUIDPipe,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import {
@@ -84,13 +84,13 @@ export class DocumentController {
 
   @UseGuards(AuthGuard)
   @HttpCode(HttpStatus.OK)
-  @Get(':id')
+  @Get(':uuid')
   @ApiOperation({
     summary: 'Get a document',
-    description: 'Retrieve a document by its ID.',
+    description: 'Retrieve a document by its UUID.',
   })
   @ApiParam({
-    name: 'id',
+    name: 'uuid',
     type: Number,
     description: 'The unique identifier of the document.',
     example: 1,
@@ -107,19 +107,19 @@ export class DocumentController {
     status: HttpStatus.UNAUTHORIZED,
     description: 'User is not authenticated.',
   })
-  getDocument(@Param('id', ParseIntPipe) id: number) {
-    return this.documentService.getDocument(id);
+  getDocument(@Param('uuid', ParseUUIDPipe) uuid: string) {
+    return this.documentService.getDocument(uuid);
   }
 
   @UseGuards(AuthGuard)
   @HttpCode(HttpStatus.OK)
-  @Delete(':id')
+  @Delete(':uuid')
   @ApiOperation({
     summary: 'Delete a document',
-    description: 'Delete a document by its ID.',
+    description: 'Delete a document by its UUID.',
   })
   @ApiParam({
-    name: 'id',
+    name: 'uuid',
     type: Number,
     description: 'The unique identifier of the document.',
     example: 1,
@@ -141,7 +141,7 @@ export class DocumentController {
     status: HttpStatus.UNAUTHORIZED,
     description: 'User is not authenticated.',
   })
-  deleteDocument(@Param('id', ParseIntPipe) id: number) {
-    return this.documentService.deleteDocument(id);
+  deleteDocument(@Param('uuid', ParseUUIDPipe) uuid: string) {
+    return this.documentService.deleteDocument(uuid);
   }
 }
